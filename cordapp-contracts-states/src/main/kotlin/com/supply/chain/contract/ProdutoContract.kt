@@ -9,10 +9,12 @@ import net.corda.core.transactions.LedgerTransaction
 class ProdutoContract : Contract {
 
     override fun verify(tx: LedgerTransaction) {
-        val comando = tx.commandsOfType<Commands>().single()
-        when(comando.value){
-            is Commands.Create -> verifyCreate(tx)
-            is Commands.Vender -> verifyVender(tx)
+        if (tx.commandsOfType<Commands>().isNotEmpty()) {
+            val comando = tx.commandsOfType<Commands>().single()
+            when (comando.value) {
+                is Commands.Create -> verifyCreate(tx)
+                is Commands.Vender -> verifyVender(tx)
+            }
         }
     }
 

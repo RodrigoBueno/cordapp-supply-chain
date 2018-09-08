@@ -43,8 +43,8 @@ class PedidoContract: Contract {
             val inputPedido = tx.inputsOfType<Pedido>().single()
             val outputPedido = tx.outputsOfType<Pedido>().single()
 
-            "O Status do pedido deve ser $statusAnterior." using (outputPedido.statusPedido == statusAnterior)
-            "O Status do pedido deveria ser $statusAtual." using (inputPedido.statusPedido == statusAtual)
+            "O Status do pedido deveria ser $statusAnterior." using (inputPedido.statusPedido == statusAnterior)
+            "O Status do pedido deve ser $statusAtual." using (outputPedido.statusPedido == statusAtual)
 
             "O Tipo dos produtos devem ser iguais ao Tipo do Produto no Pedido." using (
                     tx.outputsOfType<Produto>().all {

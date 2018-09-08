@@ -6,7 +6,6 @@ import com.supply.chain.contract.ProdutoContract
 import com.supply.chain.state.Pedido
 import com.supply.chain.state.Produto
 import com.supply.chain.state.StatusPedido
-import com.supply.chain.state.TipoProduto
 import net.corda.core.contracts.Command
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.contracts.requireThat
@@ -63,7 +62,7 @@ object EnviarPedidoFlow {
                     outrosParticipantes
                             .map { it.owningKey } + transportadora.owningKey)
 
-            val outputPedido = pedido.state.data.copy(statusPedido = StatusPedido.EmTransito)
+            val outputPedido = pedido.state.data.copy(statusPedido = StatusPedido.EmTransito, transportador = transportadora)
             val outputsProduto = produtos.map { it.state.data.copy(dono = transportadora) }
 
             val builder = TransactionBuilder(notary)
@@ -84,7 +83,7 @@ object EnviarPedidoFlow {
 
             val partSignedTx = serviceHub.signInitialTransaction(builder)
 
-            val sessoes = outrosParticipantes.map { initiateFlow(it) }
+            val sessoes = (outrosParticipantes + transportadora).map { initiateFlow(it) }
 
             val signedTx = subFlow(CollectSignaturesFlow(partSignedTx, sessoes))
 
@@ -100,8 +99,9 @@ object EnviarPedidoFlow {
                 return object : SignTransactionFlow(otherParty) {
                     override fun checkTransaction(stx: SignedTransaction) {
                         requireThat {
-                            "Apenas o Transportador pode realizar envios." using (
-                                    ourIdentity.name.organisation == "Transportador"
+                            if (stx.coreTransaction.outputsOfType<Produto>().any {  it.dono == ourIdentity })
+                            "Apenas a Transportadora pode realizar envios." using (
+                                    ourIdentity.name.organisation == "Transportadora"
                                     )
                         }
                     }

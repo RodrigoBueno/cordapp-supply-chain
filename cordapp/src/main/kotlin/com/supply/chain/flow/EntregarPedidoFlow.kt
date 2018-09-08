@@ -101,9 +101,11 @@ object EntregarPedidoFlow {
                 return object : SignTransactionFlow(otherParty) {
                     override fun checkTransaction(stx: SignedTransaction) {
                         requireThat {
-                            "Apenas o Transportador pode realizar envios." using (
-                                    otherParty.counterparty.name.organisation == "Transportador"
-                                    )
+                            if (stx.coreTransaction.outputsOfType<Produto>().any {  it.dono != ourIdentity }) {
+                                "Apenas a Transportadora pode realizar envios." using (
+                                        otherParty.counterparty.name.organisation == "Transportadora"
+                                        )
+                            }
                         }
                     }
                 }
