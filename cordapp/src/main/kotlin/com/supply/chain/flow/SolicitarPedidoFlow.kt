@@ -51,14 +51,14 @@ object SolicitarPedidoFlow {
             fun getSignTransactionFlow(otherParty: FlowSession): FlowLogic<SignedTransaction> {
                 return object : SignTransactionFlow(otherParty) {
 
-                    fun validarDistribuidor(stx: SignedTransaction) {
+                    fun validarDistribuidor() {
                         requireThat {
                             "Apenas a Loja pode fazer o pedidos para o Distribuidor." using
                                     (otherParty.counterparty.name.organisation == "Loja")
                         }
                     }
 
-                    fun validarProdutor(stx: SignedTransaction) {
+                    fun validarProdutor() {
                         requireThat {
                             "Apenas o Distribuidor pode fazer o pedidos para o Produtor." using
                                     (otherParty.counterparty.name.organisation == "Distribuidor")
@@ -67,8 +67,8 @@ object SolicitarPedidoFlow {
 
                     override fun checkTransaction(stx: SignedTransaction) {
                         when(ourIdentity.name.organisation) {
-                            "Produtor" -> validarProdutor(stx)
-                            "Distribuidor" -> validarDistribuidor(stx)
+                            "Produtor" -> validarProdutor()
+                            "Distribuidor" -> validarDistribuidor()
                             else -> throw FlowException()
                         }
 
